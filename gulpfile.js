@@ -89,59 +89,55 @@ const isDevelopment = !process.env.NODE_ENV || process.env.NODE_ENV == 'developm
 
 gulp.task('build:html', function () {
 	return gulp.src(path.src.html)
-				.pipe(rigger())
-				.pipe(gulpIf(!isDevelopment, htmlmin({ collapseWhitespace: true })))
-				.pipe(gulp.dest(path.dist.html))
-				.pipe(browserSync.reload({stream: true}));
+		.pipe(rigger())
+		.pipe(gulpIf(!isDevelopment, htmlmin({ collapseWhitespace: true })))
+		.pipe(gulp.dest(path.dist.html))
+		.pipe(browserSync.reload({stream: true}));
 });
 
 gulp.task('build:sass', function () {
 	return gulp.src(path.src.style)
-				.pipe(plumber(plumberNotifier))
-				.pipe(gulpIf(isDevelopment, sourcemaps.init()))
-				.pipe(sass())
-				.pipe(gulpIf(!isDevelopment, uncss({ // - remove unused css
-					html: ['src/index.html']
-				})))
-				.pipe(autoprefixer())
-				.pipe(gulpIf(!isDevelopment, cleanCss())) // - compress css
-				.pipe(gulpIf(isDevelopment, sourcemaps.write()))
-				.pipe(gulp.dest(path.dist.style))
-				.pipe(browserSync.reload({stream: true}));
+		.pipe(plumber(plumberNotifier))
+		.pipe(gulpIf(isDevelopment, sourcemaps.init()))
+		.pipe(sass())
+		.pipe(gulpIf(!isDevelopment, uncss({ // - remove unused css
+			html: ['src/index.html']
+		})))
+		.pipe(autoprefixer())
+		.pipe(gulpIf(!isDevelopment, cleanCss())) // - compress css
+		.pipe(gulpIf(isDevelopment, sourcemaps.write()))
+		.pipe(gulp.dest(path.dist.style))
+		.pipe(browserSync.reload({stream: true}));
 });
 
 gulp.task('build:js', function () {
 	return gulp.src(path.src.js)
-				.pipe(plumber(plumberNotifier))
-				.pipe(rigger()) // - include files
-				.pipe(gulpIf(isDevelopment, sourcemaps.init()))
-				.pipe(gulpIf(!isDevelopment, uglify())) // - compress js
-				.pipe(gulpIf(isDevelopment, sourcemaps.write()))
-				.pipe(gulp.dest(path.dist.js))
-				.pipe(browserSync.reload({stream: true}));
+		.pipe(plumber(plumberNotifier))
+		.pipe(rigger()) // - include files
+		.pipe(gulpIf(isDevelopment, sourcemaps.init()))
+		.pipe(gulpIf(!isDevelopment, uglify())) // - compress js
+		.pipe(gulpIf(isDevelopment, sourcemaps.write()))
+		.pipe(gulp.dest(path.dist.js))
+		.pipe(browserSync.reload({stream: true}));
 });
 
 gulp.task('build:sprite', function () {
-	var spriteData = gulp.src(path.src.sprite)
-			.pipe(spritesmith(spritesmithConf));
-
+	var spriteData = gulp.src(path.src.sprite).pipe(spritesmith(spritesmithConf));
 		spriteData.img.pipe(gulp.dest(path.dist.spriteImg));
 		spriteData.css.pipe(gulp.dest(path.dist.spriteStyle));
-
 });
 
 gulp.task('build:img', ['build:sprite'], function () {
 	return gulp.src([path.src.img, '!' + path.src.sprite])
-				.pipe(changed(path.dist.img)) // will only get the files that changed since the last time it was run
-				.pipe(imagemin(imageminConf))
-				.pipe(debug())
-				.pipe(gulp.dest(path.dist.img))
-				.pipe(browserSync.reload({ stream: true }))
+		.pipe(changed(path.dist.img)) // will only get the files that changed since the last time it was run
+		.pipe(imagemin(imageminConf))
+		.pipe(debug())
+		.pipe(gulp.dest(path.dist.img))
+		.pipe(browserSync.reload({ stream: true }))
 });
 
 gulp.task('build:fonts', function () {
-	return gulp.src(path.src.fonts)
-				.pipe(gulp.dest(path.dist.fonts))
+	return gulp.src(path.src.fonts).pipe(gulp.dest(path.dist.fonts))
 });
 
 gulp.task('clean', function (callback) {
