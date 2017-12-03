@@ -29,31 +29,31 @@ const plumberNotifier = plumber({
 });
 
 const path = {
-		src: {
-			html: 'src/*.html',
-			style: 'src/scss/main.scss',
-			js: 'src/js/main.js',
-			img: 'src/img/**/*.*',
-			sprite: 'src/img/icons/*.*',
-			fonts: 'src/fonts/**/*.*'
-		},
-		dist: {
-			html: 'dist/',
-			style: 'dist/css/',
-			spriteStyle: 'src/scss/components/',
-			js: 'dist/js/',
-			img: 'dist/img/',
-			spriteImg: 'src/img/',
-			fonts: 'dist/fonts/'
-		},
-		watch: {
-			html: 'src/*.html',
-			style: 'src/scss/**/*.scss',
-			js: 'src/js/**/*.js',
-			img: 'src/img/**/*.*',
-			fonts: 'src/fonts/**/*.*'
-		}
-	};
+	src: {
+		html: 'src/*.html',
+		style: 'src/scss/main.scss',
+		js: 'src/js/main.js',
+		img: 'src/img/**/*.*',
+		sprite: 'src/img/icons/*.*',
+		fonts: 'src/fonts/**/*.*'
+	},
+	dist: {
+		html: 'dist/',
+		style: 'dist/css/',
+		spriteStyle: 'src/scss/components/',
+		js: 'dist/js/',
+		img: 'dist/img/',
+		spriteImg: 'src/img/',
+		fonts: 'dist/fonts/'
+	},
+	watch: {
+		html: 'src/*.html',
+		style: 'src/scss/**/*.scss',
+		js: 'src/js/**/*.js',
+		img: 'src/img/**/*.*',
+		fonts: 'src/fonts/**/*.*'
+	}
+};
 
 const serverConf = {
 	server: {
@@ -82,7 +82,7 @@ const spritesmithConf = {
 	cssVarMap: function (sprite) {
 		sprite.name = 'icon-' + sprite.name;
 	}
-}
+};
 
 // "set NODE_ENV=production" or "set NODE_ENV=development" in console
 const isDevelopment = !process.env.NODE_ENV || process.env.NODE_ENV == 'development';
@@ -123,8 +123,8 @@ gulp.task('build:js', function () {
 
 gulp.task('build:sprite', function () {
 	var spriteData = gulp.src(path.src.sprite).pipe(spritesmith(spritesmithConf));
-		spriteData.img.pipe(gulp.dest(path.dist.spriteImg));
-		spriteData.css.pipe(gulp.dest(path.dist.spriteStyle));
+	spriteData.img.pipe(gulp.dest(path.dist.spriteImg));
+	spriteData.css.pipe(gulp.dest(path.dist.spriteStyle));
 });
 
 gulp.task('build:img', ['build:sprite'], function () {
