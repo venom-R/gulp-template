@@ -1,25 +1,53 @@
 'use strict';
 
-const gulp = require('gulp');
-const sass = require('gulp-sass');
-const rimraf = require('rimraf');
+const gulp         = require('gulp');
+const sass         = require('gulp-sass');
+const rimraf       = require('rimraf');
 const autoprefixer = require('gulp-autoprefixer');
-const cleanCss = require('gulp-clean-css');
-const htmlmin = require('gulp-htmlmin');
-const imagemin = require('gulp-imagemin');
-const notify = require('gulp-notify');
-const uglify = require('gulp-uglify');
-const pump = require('pump');
-const watch = require('gulp-watch');
-const uncss = require('gulp-uncss');
-const sourcemaps = require('gulp-sourcemaps');
-const browserSync = require('browser-sync');
-const rigger = require('gulp-rigger');
-const gulpIf = require('gulp-if');
-const plumber = require('gulp-plumber');
-const spritesmith = require('gulp.spritesmith');
-const changed  = require('gulp-changed');
-const debug  = require('gulp-debug');
+const cleanCss     = require('gulp-clean-css');
+const htmlmin      = require('gulp-htmlmin');
+const imagemin     = require('gulp-imagemin');
+const notify       = require('gulp-notify');
+const uglify       = require('gulp-uglify');
+const pump         = require('pump');
+const watch        = require('gulp-watch');
+const uncss        = require('gulp-uncss');
+const sourcemaps   = require('gulp-sourcemaps');
+const browserSync  = require('browser-sync');
+const rigger       = require('gulp-rigger');
+const gulpIf       = require('gulp-if');
+const plumber      = require('gulp-plumber');
+const spritesmith  = require('gulp.spritesmith');
+const changed      = require('gulp-changed');
+const debug        = require('gulp-debug');
+const wait         = require('gulp-wait');
+
+const path = {
+	src: {
+		html:   'src/*.html',
+		style:  'src/scss/main.scss',
+		js:     'src/js/main.js',
+		img:    'src/img/**/*.*',
+		sprite: 'src/img/icons/*.*',
+		fonts:  'src/fonts/**/*.*'
+	},
+	dist: {
+		html:        'dist/',
+		style:       'dist/css/',
+		spriteStyle: 'src/scss/components/',
+		js:          'dist/js/',
+		img:         'dist/img/',
+		spriteImg:   'dist/img/',
+		fonts:       'dist/fonts/'
+	},
+	watch: {
+		html:  'src/*.html',
+		style: 'src/scss/**/*.scss',
+		js:    'src/js/**/*.js',
+		img:   'src/img/**/*.*',
+		fonts: 'src/fonts/**/*.*'
+	}
+};
 
 const plumberNotifier = plumber({
 	errorHandler: notify.onError({
@@ -27,33 +55,6 @@ const plumberNotifier = plumber({
 		message: "<%= error.message %>"
 	})
 });
-
-const path = {
-	src: {
-		html: 'src/*.html',
-		style: 'src/scss/main.scss',
-		js: 'src/js/main.js',
-		img: 'src/img/**/*.*',
-		sprite: 'src/img/icons/*.*',
-		fonts: 'src/fonts/**/*.*'
-	},
-	dist: {
-		html: 'dist/',
-		style: 'dist/css/',
-		spriteStyle: 'src/scss/components/',
-		js: 'dist/js/',
-		img: 'dist/img/',
-		spriteImg: 'src/img/',
-		fonts: 'dist/fonts/'
-	},
-	watch: {
-		html: 'src/*.html',
-		style: 'src/scss/**/*.scss',
-		js: 'src/js/**/*.js',
-		img: 'src/img/**/*.*',
-		fonts: 'src/fonts/**/*.*'
-	}
-};
 
 const serverConf = {
 	server: {
@@ -75,9 +76,9 @@ const imageminConf = [
 ];
 
 const spritesmithConf = {
-	imgName: 'sprite.png',
-	imgPath: '../img/sprite.png',
-	cssName: '_sprite.scss',
+	imgName:   'sprite.png',
+	imgPath:   '../img/sprite.png',
+	cssName:   '_sprite.scss',
 	algorithm: 'binary-tree',
 	cssVarMap: function (sprite) {
 		sprite.name = 'icon-' + sprite.name;
@@ -99,6 +100,7 @@ gulp.task('build:sass', function () {
 	return gulp.src(path.src.style)
 		.pipe(plumber(plumberNotifier))
 		.pipe(gulpIf(isDevelopment, sourcemaps.init()))
+		.pipe(wait(100)) // - delay 100ms
 		.pipe(sass())
 		.pipe(gulpIf(!isDevelopment, uncss({ // - remove unused css
 			html: ['src/index.html']
@@ -129,15 +131,15 @@ gulp.task('build:sprite', function () {
 
 gulp.task('build:img', ['build:sprite'], function () {
 	return gulp.src([path.src.img, '!' + path.src.sprite])
-		.pipe(changed(path.dist.img)) // will only get the files that changed since the last time it was run
+		.pipe(changed(path.dist.img)) // will get the files only that changed since the last time it was run
 		.pipe(imagemin(imageminConf))
 		.pipe(debug())
 		.pipe(gulp.dest(path.dist.img))
-		.pipe(browserSync.reload({ stream: true }))
+		.pipe(browserSync.reload({ stream: true }));
 });
 
 gulp.task('build:fonts', function () {
-	return gulp.src(path.src.fonts).pipe(gulp.dest(path.dist.fonts))
+	return gulp.src(path.src.fonts).pipe(gulp.dest(path.dist.fonts));
 });
 
 gulp.task('clean', function (callback) {
@@ -157,10 +159,10 @@ gulp.task('build', [
 ]);
 
 gulp.task('watch', function () {
-	gulp.watch(path.watch.html, ['build:html']);
+	gulp.watch(path.watch.html,  ['build:html']);
 	gulp.watch(path.watch.style, ['build:sass']);
-	gulp.watch(path.watch.js, ['build:js']);
-	gulp.watch(path.watch.img, ['build:img']);
+	gulp.watch(path.watch.js,    ['build:js']);
+	gulp.watch(path.watch.img,   ['build:img']);
 	gulp.watch(path.watch.fonts, ['build:fonts']);
 });
 
