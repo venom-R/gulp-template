@@ -11,7 +11,7 @@ const notify       = require('gulp-notify');
 const uglify       = require('gulp-uglify');
 const pump         = require('pump');
 const watch        = require('gulp-watch');
-const uncss        = require('gulp-uncss');
+
 const sourcemaps   = require('gulp-sourcemaps');
 const browserSync  = require('browser-sync');
 const rigger       = require('gulp-rigger');
@@ -80,7 +80,7 @@ const spritesmithConf = {
 	imgPath:   '../img/sprite.png',
 	cssName:   '_sprite.scss',
 	algorithm: 'binary-tree',
-	cssVarMap: function (sprite) {
+	cssVarMap: sprite => {
 		sprite.name = 'icon-' + sprite.name;
 	}
 };
@@ -88,23 +88,19 @@ const spritesmithConf = {
 // "set NODE_ENV=production" or "set NODE_ENV=development" in console
 const isDevelopment = !process.env.NODE_ENV || process.env.NODE_ENV == 'development';
 
-gulp.task('build:html', function () {
+gulp.task('build:html', () => {
 	return gulp.src(path.src.html)
-		.pipe(rigger())
 		.pipe(gulpIf(!isDevelopment, htmlmin({ collapseWhitespace: true })))
 		.pipe(gulp.dest(path.dist.html))
 		.pipe(browserSync.reload({stream: true}));
 });
 
-gulp.task('build:sass', function () {
+gulp.task('build:sass', () => {
 	return gulp.src(path.src.style)
 		.pipe(plumber(plumberNotifier))
 		.pipe(gulpIf(isDevelopment, sourcemaps.init()))
 		.pipe(wait(100)) // - delay 100ms
 		.pipe(sass())
-		.pipe(gulpIf(!isDevelopment, uncss({ // - remove unused css
-			html: ['src/index.html']
-		})))
 		.pipe(autoprefixer())
 		.pipe(gulpIf(!isDevelopment, cleanCss())) // - compress css
 		.pipe(gulpIf(isDevelopment, sourcemaps.write()))
@@ -112,7 +108,7 @@ gulp.task('build:sass', function () {
 		.pipe(browserSync.reload({stream: true}));
 });
 
-gulp.task('build:js', function () {
+gulp.task('build:js', () => {
 	return gulp.src(path.src.js)
 		.pipe(plumber(plumberNotifier))
 		.pipe(rigger()) // - include files
@@ -123,13 +119,13 @@ gulp.task('build:js', function () {
 		.pipe(browserSync.reload({stream: true}));
 });
 
-gulp.task('build:sprite', function () {
+gulp.task('build:sprite', () => {
 	var spriteData = gulp.src(path.src.sprite).pipe(spritesmith(spritesmithConf));
 	spriteData.img.pipe(gulp.dest(path.dist.spriteImg));
 	spriteData.css.pipe(gulp.dest(path.dist.spriteStyle));
 });
 
-gulp.task('build:img', ['build:sprite'], function () {
+gulp.task('build:img', ['build:sprite'], () => {
 	return gulp.src([path.src.img, '!' + path.src.sprite])
 		.pipe(changed(path.dist.img)) // will get the files only that changed since the last time it was run
 		.pipe(imagemin(imageminConf))
@@ -138,15 +134,12 @@ gulp.task('build:img', ['build:sprite'], function () {
 		.pipe(browserSync.reload({ stream: true }));
 });
 
-gulp.task('build:fonts', function () {
-	return gulp.src(path.src.fonts).pipe(gulp.dest(path.dist.fonts));
-});
+gulp.task('build:fonts', () => gulp.src(path.src.fonts)
+	.pipe(gulp.dest(path.dist.fonts)));
 
-gulp.task('clean', function (callback) {
-	return rimraf('dist', callback);
-});
+gulp.task('clean', callback => rimraf('dist', callback));
 
-gulp.task('webserver', function () {
+gulp.task('webserver', () => {
 	browserSync(serverConf);
 });
 
@@ -158,7 +151,7 @@ gulp.task('build', [
 	'build:img'
 ]);
 
-gulp.task('watch', function () {
+gulp.task('watch', () => {
 	gulp.watch(path.watch.html,  ['build:html']);
 	gulp.watch(path.watch.style, ['build:sass']);
 	gulp.watch(path.watch.js,    ['build:js']);
