@@ -1,26 +1,10 @@
-'use strict';
+"use strict";
 
-const gulp         = require('gulp');
-const sass         = require('gulp-sass');
-const rimraf       = require('rimraf');
-const autoprefixer = require('gulp-autoprefixer');
-const cleanCss     = require('gulp-clean-css');
-const htmlmin      = require('gulp-htmlmin');
-const imagemin     = require('gulp-imagemin');
-const notify       = require('gulp-notify');
-const uglify       = require('gulp-uglify');
-const pump         = require('pump');
-const watch        = require('gulp-watch');
-const sourcemaps   = require('gulp-sourcemaps');
-const browserSync  = require('browser-sync');
-const rigger       = require('gulp-rigger');
-const gulpIf       = require('gulp-if');
-const plumber      = require('gulp-plumber');
-const spritesmith  = require('gulp.spritesmith');
-const changed      = require('gulp-changed');
-const debug        = require('gulp-debug');
-const wait         = require('gulp-wait');
-const babel         = require('gulp-babel');
+const gulp = require('gulp');
+const $    = require('gulp-load-plugins')({
+	overridePattern: false,
+	pattern: ['rimraf', 'browser-sync', 'pump']
+});
 
 const path = {
 	src: {
@@ -49,8 +33,8 @@ const path = {
 	}
 };
 
-const plumberNotifier = plumber({
-	errorHandler: notify.onError({
+const plumberNotifier = $.plumber({
+	errorHandler: $.notify.onError({
 		title: 'Gulp Error!',
 		message: "<%= error.message %>"
 	})
@@ -64,10 +48,10 @@ const serverConf = {
 };
 
 const imageminConf = [
-	imagemin.gifsicle({ interlaced: true }),
-	imagemin.jpegtran({ progressive: true }),
-	imagemin.optipng({ optimizationLevel: 5 }),
-	imagemin.svgo({
+	$.imagemin.gifsicle({ interlaced: true }),
+	$.imagemin.jpegtran({ progressive: true }),
+	$.imagemin.optipng({ optimizationLevel: 5 }),
+	$.imagemin.svgo({
 		plugins: [
 			{ removeViewBox: true },
 			{ cleanupIDs: false }
@@ -90,60 +74,60 @@ const isDevelopment = !process.env.NODE_ENV || process.env.NODE_ENV == 'developm
 
 gulp.task('build:html', () => {
 	return gulp.src(path.src.html)
-		.pipe(gulpIf(!isDevelopment, htmlmin({ collapseWhitespace: true })))
+		.pipe($.if(!isDevelopment, $.htmlmin({ collapseWhitespace: true })))
 		.pipe(gulp.dest(path.dist.html))
-		.pipe(browserSync.reload({stream: true}));
+		.pipe($.browserSync.reload({stream: true}));
 });
 
 gulp.task('build:sass', () => {
 	return gulp.src(path.src.style)
-		.pipe(plumber(plumberNotifier))
-		.pipe(gulpIf(isDevelopment, sourcemaps.init()))
-		.pipe(wait(100)) // - delay 100ms
-		.pipe(sass())
-		.pipe(autoprefixer())
-		.pipe(gulpIf(!isDevelopment, cleanCss())) // - compress css
-		.pipe(gulpIf(isDevelopment, sourcemaps.write()))
+		.pipe($.plumber(plumberNotifier))
+		.pipe($.if(isDevelopment, $.sourcemaps.init()))
+		.pipe($.wait(100)) // - delay 100ms
+		.pipe($.sass())
+		.pipe($.autoprefixer())
+		.pipe($.if(!isDevelopment, $.cleanCss())) // - compress css
+		.pipe($.if(isDevelopment, $.sourcemaps.write()))
 		.pipe(gulp.dest(path.dist.style))
-		.pipe(browserSync.reload({stream: true}));
+		.pipe($.browserSync.reload({stream: true}));
 });
 
 gulp.task('build:js', () => {
 	return gulp.src(path.src.js)
-		.pipe(plumber(plumberNotifier))
-		.pipe(rigger()) // - include files
-		.pipe(gulpIf(isDevelopment, sourcemaps.init()))
-		.pipe(babel({
+		.pipe($.plumber(plumberNotifier))
+		.pipe($.rigger()) // - include files
+		.pipe($.if(isDevelopment, $.sourcemaps.init()))
+		.pipe($.babel({
 			presets: ['env']
 		}))
-		.pipe(gulpIf(!isDevelopment, uglify())) // - compress js
-		.pipe(gulpIf(isDevelopment, sourcemaps.write()))
+		.pipe($.if(!isDevelopment, $.uglify())) // - compress js
+		.pipe($.if(isDevelopment, $.sourcemaps.write()))
 		.pipe(gulp.dest(path.dist.js))
-		.pipe(browserSync.reload({stream: true}));
+		.pipe($.browserSync.reload({stream: true}));
 });
 
 gulp.task('build:sprite', () => {
-	var spriteData = gulp.src(path.src.sprite).pipe(spritesmith(spritesmithConf));
+	var spriteData = gulp.src(path.src.sprite).pipe($.spritesmith(spritesmithConf));
 	spriteData.img.pipe(gulp.dest(path.dist.spriteImg));
 	spriteData.css.pipe(gulp.dest(path.dist.spriteStyle));
 });
 
 gulp.task('build:img', ['build:sprite'], () => {
 	return gulp.src([path.src.img, '!' + path.src.sprite])
-		.pipe(changed(path.dist.img)) // will get the files only that changed since the last time it was run
-		.pipe(imagemin(imageminConf))
-		.pipe(debug())
+		.pipe($.changed(path.dist.img)) // will get the files only that changed since the last time it was run
+		.pipe($.imagemin(imageminConf))
+		.pipe($.debug())
 		.pipe(gulp.dest(path.dist.img))
-		.pipe(browserSync.reload({ stream: true }));
+		.pipe($.browserSync.reload({ stream: true }));
 });
 
 gulp.task('build:fonts', () => gulp.src(path.src.fonts)
 	.pipe(gulp.dest(path.dist.fonts)));
 
-gulp.task('clean', callback => rimraf('dist', callback));
+gulp.task('clean', callback => $.rimraf('dist', callback));
 
 gulp.task('webserver', () => {
-	browserSync(serverConf);
+	$.browserSync(serverConf);
 });
 
 gulp.task('build', [
