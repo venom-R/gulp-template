@@ -1,3 +1,3 @@
-window.onload = function () {
-	//TODO
+window.onload = () => {
+	// TODO
 };

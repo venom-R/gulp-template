@@ -11,7 +11,6 @@ const notify       = require('gulp-notify');
 const uglify       = require('gulp-uglify');
 const pump         = require('pump');
 const watch        = require('gulp-watch');
-
 const sourcemaps   = require('gulp-sourcemaps');
 const browserSync  = require('browser-sync');
 const rigger       = require('gulp-rigger');
@@ -21,6 +20,7 @@ const spritesmith  = require('gulp.spritesmith');
 const changed      = require('gulp-changed');
 const debug        = require('gulp-debug');
 const wait         = require('gulp-wait');
+const babel         = require('gulp-babel');
 
 const path = {
 	src: {
@@ -113,6 +113,9 @@ gulp.task('build:js', () => {
 		.pipe(plumber(plumberNotifier))
 		.pipe(rigger()) // - include files
 		.pipe(gulpIf(isDevelopment, sourcemaps.init()))
+		.pipe(babel({
+			presets: ['env']
+		}))
 		.pipe(gulpIf(!isDevelopment, uglify())) // - compress js
 		.pipe(gulpIf(isDevelopment, sourcemaps.write()))
 		.pipe(gulp.dest(path.dist.js))
