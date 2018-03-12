@@ -36,7 +36,7 @@ const path = {
 const plumberNotifier = $.plumber({
 	errorHandler: $.notify.onError({
 		title: 'Gulp Error!',
-		message: "<%= error.message %>"
+		message: '<%= error.message %>'
 	})
 });
 
@@ -44,7 +44,8 @@ const serverConf = {
 	server: {
 		baseDir: './dist'
 	},
-	notify: false
+	notify: false,
+	tunnel: 'venom'
 };
 
 const imageminConf = [
@@ -65,7 +66,7 @@ const spritesmithConf = {
 	cssName:   '_sprite.scss',
 	algorithm: 'binary-tree',
 	cssVarMap: sprite => {
-		sprite.name = 'icon-' + sprite.name;
+		sprite.name = `icon-${sprite.name}`;
 	}
 };
 
