@@ -3,10 +3,8 @@
 const gulp = require('gulp');
 const $    = require('gulp-load-plugins')({
 	overridePattern: false,
-	pattern: ['rimraf', 'browser-sync', 'pump', 'postcss-*']
+	pattern: ['rimraf', 'browser-sync', 'pump', 'cssnano', 'postcss-*']
 });
-
-
 
 const path = {
 	src: {
@@ -87,7 +85,8 @@ gulp.task('build:sass', () => {
 		$.postcssUncss({
 			html: [path.src.html],
 			// ignore: ['.active'] // - list of selectors that should not be removed
-		})
+		}),
+		$.cssnano()
 	];
 
 	return gulp.src(path.src.style)
@@ -95,9 +94,9 @@ gulp.task('build:sass', () => {
 		.pipe($.if(isDevelopment, $.sourcemaps.init()))
 		.pipe($.wait(100)) // - delay 100ms
 		.pipe($.sass())
-		.pipe($.if(!isDevelopment, $.postcss( postcssPlugins )))
 		.pipe($.autoprefixer())
-		.pipe($.if(!isDevelopment, $.cleanCss())) // - compress css
+		.pipe($.if(!isDevelopment, $.postcss( postcssPlugins )))
+		// .pipe($.if(!isDevelopment, $.cleanCss())) // - compress css
 		.pipe($.if(isDevelopment, $.sourcemaps.write()))
 		.pipe(gulp.dest(path.dist.style))
 		.pipe($.browserSync.reload({stream: true}));
@@ -108,9 +107,7 @@ gulp.task('build:js', () => {
 		.pipe($.plumber(plumberNotifier))
 		.pipe($.rigger()) // - include files
 		.pipe($.if(isDevelopment, $.sourcemaps.init()))
-		.pipe($.babel({
-			presets: ['env']
-		}))
+		.pipe($.babel({ presets: ['env'] }))
 		.pipe($.if(!isDevelopment, $.uglify())) // - compress js
 		.pipe($.if(isDevelopment, $.sourcemaps.write()))
 		.pipe(gulp.dest(path.dist.js))
