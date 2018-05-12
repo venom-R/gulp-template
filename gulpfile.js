@@ -3,8 +3,10 @@
 const gulp = require('gulp');
 const $    = require('gulp-load-plugins')({
 	overridePattern: false,
-	pattern: ['rimraf', 'browser-sync', 'pump']
+	pattern: ['rimraf', 'browser-sync', 'pump', 'postcss-*']
 });
+
+
 
 const path = {
 	src: {
@@ -81,11 +83,19 @@ gulp.task('build:html', () => {
 });
 
 gulp.task('build:sass', () => {
+	const postcssPlugins = [
+		$.postcssUncss({
+			html: [path.src.html],
+			// ignore: ['.active'] // - list of selectors that should not be removed
+		})
+	];
+
 	return gulp.src(path.src.style)
 		.pipe($.plumber(plumberNotifier))
 		.pipe($.if(isDevelopment, $.sourcemaps.init()))
 		.pipe($.wait(100)) // - delay 100ms
 		.pipe($.sass())
+		.pipe($.if(!isDevelopment, $.postcss( postcssPlugins )))
 		.pipe($.autoprefixer())
 		.pipe($.if(!isDevelopment, $.cleanCss())) // - compress css
 		.pipe($.if(isDevelopment, $.sourcemaps.write()))
