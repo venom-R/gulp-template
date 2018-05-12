@@ -96,7 +96,6 @@ gulp.task('build:sass', () => {
 		.pipe($.sass())
 		.pipe($.autoprefixer())
 		.pipe($.if(!isDevelopment, $.postcss( postcssPlugins )))
-		// .pipe($.if(!isDevelopment, $.cleanCss())) // - compress css
 		.pipe($.if(isDevelopment, $.sourcemaps.write()))
 		.pipe(gulp.dest(path.dist.style))
 		.pipe($.browserSync.reload({stream: true}));

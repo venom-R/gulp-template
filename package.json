@@ -27,7 +27,6 @@
     "gulp-autoprefixer": "^4.0.0",
     "gulp-babel": "^7.0.1",
     "gulp-changed": "^3.1.1",
-    "gulp-clean-css": "^3.9.0",
     "gulp-debug": "^3.1.0",
     "gulp-htmlmin": "^3.0.0",
     "gulp-if": "^2.0.2",
